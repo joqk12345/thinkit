@@ -1,0 +1,6 @@
+*.xml
+*.class
+*.iml
+target/classes/log4j.properties
+target/maven-archiver/pom.properties
+target/thinkit-0.1.0.jar
