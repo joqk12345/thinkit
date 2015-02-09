@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -45,21 +48,23 @@ public class HBaseSound {
 	        if (admin.tableExists(tableName)) {
 	            System.out.println("table already exists!");
 	        } else {
-	            HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+	            HTableDescriptor tableDesc = new HTableDescriptor(TableName.valueOf(tableName));
 	            for(int i=0; i<familys.length; i++){
 	                tableDesc.addFamily(new HColumnDescriptor(familys[i]));
 	            }
 	            admin.createTable(tableDesc);
 	            System.out.println("create table " + tableName + " ok.");
 	        } 
+	        admin.close();
 	    }
 	    
 	    /**
 	     * 删除表
 	     */
 	    public static void deleteTable(String tableName) throws Exception {
+	    	HBaseAdmin admin=null;
 	       try {
-	           HBaseAdmin admin = new HBaseAdmin(conf);
+	            admin = new HBaseAdmin(conf);
 	           admin.disableTable(tableName);
 	           admin.deleteTable(tableName);
 	           System.out.println("delete table " + tableName + " ok.");
@@ -67,6 +72,10 @@ public class HBaseSound {
 	           e.printStackTrace();
 	       } catch (ZooKeeperConnectionException e) {
 	           e.printStackTrace();
+	       }finally{
+	    	   if(admin!=null){
+	    		   admin.close();
+	    	   }
 	       }
 	    }
 	     
@@ -138,16 +147,17 @@ public class HBaseSound {
 	    public static void getOneRecord (String tableName, String rowKey) throws IOException{
 	        HTable table = new HTable(conf, tableName);
 	        Get get = new Get(rowKey.getBytes());
+//	        get.addFamily("i".getBytes());
 	        Result rs = table.get(get);
 	        int i=0;
-	        for(KeyValue kv : rs.raw()){
+	        for(Cell cell : rs.listCells()){
 	            i++;
-	        	System.out.print(new String(kv.getRow()) + " " );
-	            System.out.print(new String(kv.getFamily()) + ":" );
-	            System.out.print(new String(kv.getQualifier()) + " " );
-//	            System.out.print(kv.getTimestamp() + " " );
-	            System.out.println(new String(kv.getValue()));
-	            System.out.println(i);
+	        	System.out.print("raw:"+ new String (CellUtil.cloneRow(cell))+ " ");
+	            System.out.print("family:"+new String(CellUtil.cloneFamily(cell)) + ":" );
+	            System.out.print("qualifier:"+new String(CellUtil.cloneQualifier(cell)) + " " );
+	            System.out.print("ts:"+cell.getTimestamp() + " " );
+	            System.out.println("value:"+new String(CellUtil.cloneValue(cell)));
+	            System.out.println("标号"+i);
 	        }
 	    }
 	     
@@ -160,12 +170,12 @@ public class HBaseSound {
 	             Scan s = new Scan();
 	             ResultScanner ss = table.getScanner(s);
 	             for(Result r:ss){
-	                 for(KeyValue kv : r.raw()){
-	                    System.out.print(new String(kv.getRow()) + " ");
-	                    System.out.print(new String(kv.getFamily()) + ":");
-	                    System.out.print(new String(kv.getQualifier()) + " ");
-	                    System.out.print(kv.getTimestamp() + " ");
-	                    System.out.println(new String(kv.getValue()));
+	                 for(Cell cell : r.listCells()){
+	                    System.out.print(new String(CellUtil.cloneRow(cell)) + " ");
+	                    System.out.print(new String(CellUtil.cloneFamily(cell)) + ":");
+	                    System.out.print(new String(CellUtil.cloneQualifier(cell)) + " ");
+	                    System.out.print(cell.getTimestamp() + " ");
+	                    System.out.println(new String(CellUtil.cloneValue(cell)));
 	                 }
 	             }
 	        } catch (IOException e){
@@ -178,7 +188,7 @@ public class HBaseSound {
 	            String tablename = "minifiletable3";
 //	            String[] familys = {"grade", "course"};
 	            String[] familys = {"i", "m","q"};
-	            HBaseSound.creatTable(tablename, familys);
+//	            HBaseSound.creatTable(tablename, familys);
 	             
 	            //add record zkb
 //	            HBaseSound.addRecord(tablename,"zkb","grade","","5");
@@ -186,9 +196,9 @@ public class HBaseSound {
 //	            HBaseSound.addRecord(tablename,"zkb","course","math","97");
 //	            HBaseSound.addRecord(tablename,"zkb","course","art","87");
 	            //add record  baoniu
-	            HBaseSound.addRecord(tablename,"baoniu","i","keydezhi","keydevalue");
-	            HBaseSound.addRecord(tablename,"baoniu","m","","true");
-	            HBaseSound.addRecord(tablename,"baoniu","q","","false");
+//	            HBaseSound.addRecord(tablename,"baoniu","i","keydezhi","keydevalue");
+//	            HBaseSound.addRecord(tablename,"baoniu","m","","true");
+//	            HBaseSound.addRecord(tablename,"baoniu","q","","false");
 	             
 	            System.out.println("===========get one record========");
 	            HBaseSound.getOneRecord(tablename, "baoniu");
@@ -199,7 +209,7 @@ public class HBaseSound {
 //	            HBaseSound.delRecord(tablename, "baoniu");
 //	            HBaseSound.getAllRecord(tablename);
 //	            System.out.println("===========show all record========");
-//	            HBaseSound.getAllRecord(tablename);
+	            HBaseSound.getAllRecord(tablename);
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }

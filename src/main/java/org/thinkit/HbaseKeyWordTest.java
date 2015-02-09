@@ -5,6 +5,8 @@ import java.net.InetAddress;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
@@ -32,7 +34,7 @@ public class HbaseKeyWordTest {
 		private static Put resultToPut(ImmutableBytesWritable key, Result result) throws IOException {
 	  		Put put = new Put(key.get());
 	  		int i=0;
-	 		for (KeyValue kv : result.raw()) {
+	 		for (Cell cell : result.listCells()) {
 	 			  FileSystem fs= HDFSUtil.getFileSystem("master", 9000);
 	 			//执行关键词操作
 	 			//输入 语音比特流 和 关键词比特流
@@ -44,7 +46,7 @@ public class HbaseKeyWordTest {
 //	 			a.setServer("192.168.11.39", 8888);
 	 			a.setServer("127.0.0.1", 8888);
 	 			a.setID(i);
-	 			a.setIndexData(kv.getValue());
+	 			a.setIndexData(CellUtil.cloneValue(cell));
 	 			a.setKeywordData(HDFSUtil.readByteFile(fs, "/home/hadoop/keyword.txt"));
 	 			//执行关键词
 	 			a.doIndexKeyword();
@@ -52,7 +54,7 @@ public class HbaseKeyWordTest {
 	 			System.out.println("打印关键词结果"+a.getKeywordResult());
 	 			System.out.println("关键词索引打印"+a.getIndexData().toString());
 //	 			ByteDecoderJulyNinth.Recogtioner(kv.getValue());
-				put.add(kv);
+				put.add(cell);
 				i++;
 			}
 			return put;
