@@ -7,6 +7,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
@@ -34,18 +35,15 @@ public class Htable {
           
         
         HBaseAdmin admin = new HBaseAdmin(hbaseConf);
-        HTableDescriptor htableDescriptor = new HTableDescriptor("table".getBytes());  //set the name of table
+        HTableDescriptor htableDescriptor = new HTableDescriptor(TableName.valueOf("table"));  //set the name of table
         htableDescriptor.addFamily(new HColumnDescriptor("fam1")); //set the name of column clusters
         admin.createTable(htableDescriptor); //create a table 
         HTable table = new HTable(hbaseConf, "table"); //get instance of table.
         for (int i = 0; i < 3; i++) {   //for is number of rows
             Put putRow = new Put(("row" + i).getBytes()); //the ith row
-            putRow.add("fam1".getBytes(), "col1".getBytes(), "vaule1"
-                    .getBytes());  //set the name of column and value.
-            putRow.add("fam1".getBytes(), "col2".getBytes(), "vaule2"
-                    .getBytes());
-            putRow.add("fam1".getBytes(), "col3".getBytes(), "vaule3"
-                    .getBytes());
+            putRow.add("fam1".getBytes(), "col1".getBytes(), "vaule1".getBytes());  //set the name of column and value.
+            putRow.add("fam1".getBytes(), "col2".getBytes(), "vaule2".getBytes());
+            putRow.add("fam1".getBytes(), "col3".getBytes(), "vaule3".getBytes());
             table.put(putRow);
         }
         for(Result result: table.getScanner("fam1".getBytes())){//get data of column clusters 
