@@ -7,7 +7,7 @@ package org.thinkit.util;
 public class Const {
     //hbase的表名
     public static final String HBASE_TABLE_NAME = "AudioBase";
-    public static final String HBASE_TABLE_TEST_NAME = "AudioBaseTest";
+    public static final String HBASE_TABLE_TEST_NAME = "scores";
 
     public static final String HADOOP_MAP_SPECULATIVE_EXECUTION = "mapred.map.tasks.speculative.execution";
     public static final String HADOOP_REDUCE_SPECULATIVE_EXECUTION = "mapred.reduce.tasks.speculative.execution";
