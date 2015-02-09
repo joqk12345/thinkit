@@ -4,10 +4,7 @@ package org.thinkit.util;
 //import java.text.SimpleDateFormat;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.ColumnPaginationFilter;
 import org.apache.hadoop.hbase.filter.Filter;
@@ -108,7 +105,8 @@ public class HBaseManager extends Thread {
         if (admin.tableExists(tableName)) {
             System.out.println("table already exists!");
         } else {
-            HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+//            HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+            HTableDescriptor tableDesc = new HTableDescriptor(TableName.valueOf(tableName));
             for(int i=0; i<familys.length; i++){
                 tableDesc.addFamily(new HColumnDescriptor(familys[i]));
             }
@@ -178,17 +176,23 @@ public class HBaseManager extends Thread {
 		System.out.println("time: " + (en - st) + "... ms");
 	}
 
-	public void get(String rowkey, String columnFamily, String[] columns)
-			throws IOException {
+    /**
+     * 查看一个列族下面的所有 列信息
+     * @param rowkey
+     * @param columnFamily
+     * @param columns
+     * @throws IOException
+     */
+	public void get(String rowkey, String columnFamily, String[] columns)	throws IOException {
+
 		Get get = new Get(Bytes.toBytes(rowkey));
 		for (int i = 0; i < columns.length; i++) {
-			get.addColumn(Bytes.toBytes(columnFamily),
-					Bytes.toBytes(columns[i]));
+			get.addColumn(Bytes.toBytes(columnFamily),Bytes.toBytes(columns[i]));
 		}
 		Result dbResult = table.get(get);
 		try {
-			System.out.println("size=" + dbResult.size() + ", value="
-					+ Bytes.toString(dbResult.list().get(0).getValue()));
+//			System.out.println("size=" + dbResult.size() + ", value="+ Bytes.toString(dbResult.list().get(0).getValue()));
+            System.out.println("size=" + dbResult.size() + ", value="+ Bytes.toString(dbResult.listCells().get(0).getValueArray()));
 		} catch (Exception e) {
 		}
 
