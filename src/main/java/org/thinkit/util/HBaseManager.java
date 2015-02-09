@@ -103,8 +103,9 @@ public class HBaseManager extends Thread {
 //        m.creatTable(Const.HBASE_TABLE_TEST_NAME,familys );
 		// m.testScanner();
         
-        m.get("row1", "cf1", new String[]{"mid"});
+//        m.get("row1", "cf1", new String[]{"mid"});
 //		 m.put();
+        m.test();
 //		 m.testGet();
 		// m.testScanGet();
 //		m.testPageFilter();
@@ -293,23 +294,17 @@ public class HBaseManager extends Thread {
 		System.out.println("add Tom's data");
 
 		Put tomPut = new Put(new String("Tom").getBytes());
-		tomPut.add(new String("grade").getBytes(), new byte[] {}, new String(
-				"1").getBytes());
-		tomPut.add(new String("grade").getBytes(),
-				new String("math").getBytes(), new String("87").getBytes());
-		tomPut.add(new String("course").getBytes(),
-				new String("math").getBytes(), new String("97").getBytes());
+		tomPut.add(new String("grade").getBytes(), new byte[] {}, new String("1").getBytes());
+		tomPut.add(new String("grade").getBytes(), new String("math").getBytes(), new String("87").getBytes());
+		tomPut.add(new String("course").getBytes(),new String("math").getBytes(), new String("97").getBytes());
 		table.put(tomPut);
 
 		System.out.println("add Jerry's data");
 
 		Put jerryPut = new Put(new String("Jerry").getBytes());
-		jerryPut.add(new String("grade").getBytes(), new byte[] {}, new String(
-				"2").getBytes());
-		jerryPut.add(new String("grade").getBytes(),
-				new String("math").getBytes(), new String("77").getBytes());
-		jerryPut.add(new String("course").getBytes(),
-				new String("math").getBytes(), new String("92").getBytes());
+		jerryPut.add(new String("grade").getBytes(), new byte[] {}, new String("2").getBytes());
+		jerryPut.add(new String("grade").getBytes(),new String("math").getBytes(), new String("77").getBytes());
+		jerryPut.add(new String("course").getBytes(),new String("math").getBytes(), new String("92").getBytes());
 		table.put(jerryPut);
 
 		System.out.println("Get Tom's data");
@@ -319,16 +314,13 @@ public class HBaseManager extends Thread {
 
 		System.out.println("Get Tom's Math grade");
 		Get mathGet = new Get(new String("Tom").getBytes());
-		mathGet.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("grade"));
+//		mathGet.addColumn(Bytes.toBytes("grade"), Bytes.toBytes("math"));
 		mathGet.setMaxVersions();
 		Result rs = table.get(mathGet);
 
-		NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> nMap = rs
-				.getMap();
-		NavigableMap<byte[], NavigableMap<Long, byte[]>> columnMap = nMap
-				.get(Bytes.toBytes("grade"));
-		NavigableMap<Long, byte[]> qualMap = columnMap.get(Bytes
-				.toBytes("math"));
+		NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> nMap = rs.getMap();
+		NavigableMap<byte[], NavigableMap<Long, byte[]>> columnMap = nMap.get(Bytes.toBytes("grade"));
+		NavigableMap<Long, byte[]> qualMap = columnMap.get(Bytes.toBytes("math"));
 
 		for (Map.Entry<Long, byte[]> m : qualMap.entrySet()) {
 
