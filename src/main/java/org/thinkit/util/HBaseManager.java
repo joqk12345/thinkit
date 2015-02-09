@@ -49,6 +49,25 @@ public class HBaseManager extends Thread {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * 操作完成之后，释放资源句柄
+	 */
+	public void releaseResource(){
+		if(table!=null){
+			try {
+				table.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(admin!=null){
+			try {
+				admin.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public void run() {
 		BufferedReader br = null;
@@ -83,8 +102,10 @@ public class HBaseManager extends Thread {
         String[] familys = {"cf1","cf2"};
 //        m.creatTable(Const.HBASE_TABLE_TEST_NAME,familys );
 		// m.testScanner();
+        
+        m.get("row1", "cf1", new String[]{"mid"});
 //		 m.put();
-		 m.testGet();
+//		 m.testGet();
 		// m.testScanGet();
 //		m.testPageFilter();
 //		m.testPageFilter2(2, Bytes.toBytes("row1"));
@@ -96,6 +117,7 @@ public class HBaseManager extends Thread {
 		// Bytes.toBytes(123111));
 		// System.out.println(put.toJSON());
 //		 m.testIncr();
+		 m.releaseResource();
 	}
 /*
     数据库定义DDL
@@ -114,7 +136,10 @@ public class HBaseManager extends Thread {
             System.out.println("create table " + tableName + " ok.");
         }
     }
-
+    /**
+     * 更新操作，CRUD之 U  只针对长整形变量
+     * @throws IOException
+     */
 	public void testIncr() throws IOException {
 		long st = System.currentTimeMillis();
 		byte[] rk = Bytes.toBytes("row1");
@@ -191,9 +216,11 @@ public class HBaseManager extends Thread {
 		}
 		Result dbResult = table.get(get);
 		try {
-//			System.out.println("size=" + dbResult.size() + ", value="+ Bytes.toString(dbResult.list().get(0).getValue()));
-            System.out.println("size=" + dbResult.size() + ", value="+ Bytes.toString(dbResult.listCells().get(0).getValueArray()));
+			System.out.println("size=" + dbResult.size() + ", value="+ Bytes.toInt(dbResult.list().get(0).getValue()));
+			//使用new api 去提高效率
+            System.out.println("size=" + dbResult.size() + ", value="+ Bytes.toInt(CellUtil.cloneValue(dbResult.listCells().get(0))));
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -210,10 +237,8 @@ public class HBaseManager extends Thread {
 		while (null != rs) {
 			++count;
 			System.out.println(rs.size());
-			NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> nMap = rs
-					.getMap();
-			NavigableMap<byte[], NavigableMap<Long, byte[]>> columnMap = nMap
-					.get(Bytes.toBytes("description"));
+			NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> nMap = rs.getMap();
+			NavigableMap<byte[], NavigableMap<Long, byte[]>> columnMap = nMap.get(Bytes.toBytes("description"));
 			NavigableMap<Long, byte[]> qualMap = columnMap.get(new byte[] {});
 
 			if (qualMap.entrySet().size() > 0) {
@@ -259,8 +284,7 @@ public class HBaseManager extends Thread {
 		}
 
 		System.out.println("create table");
-		HTableDescriptor tableDescripter = new HTableDescriptor(
-				"scores".getBytes());
+		HTableDescriptor tableDescripter = new HTableDescriptor(TableName.valueOf("scores"));
 		tableDescripter.addFamily(new HColumnDescriptor("grade"));
 		tableDescripter.addFamily(new HColumnDescriptor("course"));
 
@@ -417,10 +441,8 @@ public class HBaseManager extends Thread {
 	
 
 	public static String getRealRowKey(KeyValue kv) {
-		int rowlength = Bytes.toShort(kv.getBuffer(), kv.getOffset()
-				+ KeyValue.ROW_OFFSET);
-		String rowKey = Bytes.toStringBinary(kv.getBuffer(), kv.getOffset()
-				+ KeyValue.ROW_OFFSET + Bytes.SIZEOF_SHORT, rowlength);
+		int rowlength = Bytes.toShort(kv.getBuffer(), kv.getOffset()+ KeyValue.ROW_OFFSET);
+		String rowKey = Bytes.toStringBinary(kv.getBuffer(), kv.getOffset()+ KeyValue.ROW_OFFSET + Bytes.SIZEOF_SHORT, rowlength);
 		return rowKey;
 	}
 
@@ -439,7 +461,7 @@ public class HBaseManager extends Thread {
 		Result dbResult = table.get(get);
 
 		System.out.println("result=" + dbResult.toString());
-		System.out.println("result=" + dbResult.list().get(0).getTimestamp());
+		System.out.println("result=" + dbResult.listCells().get(0).getTimestamp());
 		long en2 = System.currentTimeMillis();
 		System.out.println("Total Time: " + (en2 - st) + " ms");
 
