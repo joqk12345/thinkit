@@ -137,6 +137,7 @@ public class HBaseManager extends Thread {
 
 	public static final boolean AUTO_FLUSH = false;
 	public static final int WRITE_BUFFER_SIZE = 12 * 1024 * 1024;
+	
 
 	public void put() throws IOException {
 		// table.setAutoFlush(AUTO_FLUSH);
