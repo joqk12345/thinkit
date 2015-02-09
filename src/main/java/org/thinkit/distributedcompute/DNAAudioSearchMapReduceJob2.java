@@ -6,6 +6,8 @@ import java.net.InetAddress;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.KeyValue;
@@ -43,20 +45,20 @@ public class DNAAudioSearchMapReduceJob2 {
  			String columnQualifier =null;
  			Long ts =0L;
  			
- 			for (KeyValue kv : columns.list()) {
+ 			for (Cell cell : columns.listCells()) {
  				Sound recognition = new Sound ();
 //	 			String ip = InetAddress.getLocalHost().getHostAddress();
 //	 			System.out.println(" 打印本机ip地址："+ip);
 //	 			a.setServer("192.168.11.39", 8888);
  				recognition.setServer("127.0.0.1", 40010);
  				
- 				columnFamily=new String(kv.getFamily());
- 				columnQualifier=new String(kv.getQualifier());
- 				ts = kv.getTimestamp();
+ 				columnFamily=new String(CellUtil.cloneFamily(cell));
+ 				columnQualifier=new String(CellUtil.cloneQualifier(cell));
+ 				ts = cell.getTimestamp();
  				//如果是原始语音的  且 qulifer 等于  AUdioByte的，我进行固定音频检测
  				if(columnFamily.equals("AudioOriginalByteFile")&&columnQualifier.equals("AudioByte")){
  					//送数据
- 	 				recognition.setSoundData(kv.getValue());
+ 	 				recognition.setSoundData(CellUtil.cloneValue(cell));
  		 			//执行固定音频检索	
  	 				recognition.doRecognize();
  	 				//设置输出值
