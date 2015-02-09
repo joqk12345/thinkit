@@ -81,10 +81,10 @@ public class HBaseManager extends Thread {
 	public static void main(String[] args) throws Exception {
 		HBaseManager m = new HBaseManager();
         String[] familys = {"cf1","cf2"};
-        m.creatTable(Const.HBASE_TABLE_TEST_NAME,familys );
+//        m.creatTable(Const.HBASE_TABLE_TEST_NAME,familys );
 		// m.testScanner();
 //		 m.put();
-		// m.testGet();
+		 m.testGet();
 		// m.testScanGet();
 //		m.testPageFilter();
 //		m.testPageFilter2(2, Bytes.toBytes("row1"));
