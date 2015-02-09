@@ -46,7 +46,7 @@ public class HBaseManager extends Thread {
 		try {
 			// table = new HTable(config,
 			// Bytes.toBytes("user_behavior_attribute_noregistered"));
-			table = new HTable(config, Bytes.toBytes("demo_table"));
+			table = new HTable(config, Bytes.toBytes(Const.HBASE_TABLE_TEST_NAME));
 			admin = new HBaseAdmin(config);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -83,8 +83,10 @@ public class HBaseManager extends Thread {
 
 	public static void main(String[] args) throws Exception {
 		HBaseManager m = new HBaseManager();
+        String[] familys = {"cf1","cf2"};
+        m.creatTable(Const.HBASE_TABLE_TEST_NAME,familys );
 		// m.testScanner();
-		 m.put();
+//		 m.put();
 		// m.testGet();
 		// m.testScanGet();
 //		m.testPageFilter();
@@ -98,6 +100,22 @@ public class HBaseManager extends Thread {
 		// System.out.println(put.toJSON());
 //		 m.testIncr();
 	}
+/*
+    数据库定义DDL
+ */
+    public  void creatTable(String tableName, String[] familys) throws Exception {
+
+        if (admin.tableExists(tableName)) {
+            System.out.println("table already exists!");
+        } else {
+            HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+            for(int i=0; i<familys.length; i++){
+                tableDesc.addFamily(new HColumnDescriptor(familys[i]));
+            }
+            admin.createTable(tableDesc);
+            System.out.println("create table " + tableName + " ok.");
+        }
+    }
 
 	public void testIncr() throws IOException {
 		long st = System.currentTimeMillis();
