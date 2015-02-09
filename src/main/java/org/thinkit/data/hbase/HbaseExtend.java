@@ -38,6 +38,7 @@ public class HbaseExtend {
 			}	
 			c =fis.read(bytes);
 		}
+		fis.close();
 		return true;
 	}
 		

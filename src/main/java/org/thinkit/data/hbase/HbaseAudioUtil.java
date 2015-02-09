@@ -35,6 +35,7 @@ public class HbaseAudioUtil {
 			}
 			c = fis.read(bytes);
 		}
+		fis.close();
 		return true;
 	}
 
