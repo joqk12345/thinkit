@@ -3,8 +3,8 @@ package org.thinkit;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -24,9 +24,9 @@ public class test1 {
 		
 		private static Put resultToPut(ImmutableBytesWritable key, Result result) throws IOException {
 	  		Put put = new Put(key.get());
-	 		for (KeyValue kv : result.raw()) {
+	 		for (Cell cell : result.listCells()) {
 	 			//执行识别操作
-				put.add(kv);
+				put.add(cell);
 			}
 			return put;
 	   	}
@@ -44,6 +44,8 @@ public class test1 {
 		config.set("hbase.zookeeper.property.clientPort", "2181");
 		
 		Job job = new Job(config, "ExampleReadWrite");
+//		Job job = new Job().getInstance();
+//		job.setJobName("ExampleReadWrite");
 		job.setJarByClass(test1.class);     // class that contains mapper
 
 		Scan scan = new Scan();
