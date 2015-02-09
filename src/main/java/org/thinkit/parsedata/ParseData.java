@@ -56,6 +56,7 @@ public class ParseData {
 	    int eof= fc.read(buff);
 	    System.out.println(buff.array().length);
 	    //读完头之后结束流
+	    fileInputStream.close();
 	    fc.close();
 	    buff.clear();
 		return "bbb";
