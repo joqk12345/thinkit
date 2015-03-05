@@ -1,8 +1,5 @@
 package org.thinkit.distributedcompute;
 
-import java.io.IOException;
-import java.net.InetAddress;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -20,7 +17,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.thinkit.decoder.Sound;
+import org.thinkit.decoder.SpeechAnalysisTool;
+
+import java.io.IOException;
+import java.net.InetAddress;
 
 public class DNAAudioSearchMapReduceJob2 {
 	
@@ -44,11 +44,12 @@ public class DNAAudioSearchMapReduceJob2 {
  			Long ts =0L;
  			
  			for (Cell cell : columns.listCells()) {
- 				Sound recognition = new Sound ();
+// 				Sound recognition = new Sound ();
 //	 			String ip = InetAddress.getLocalHost().getHostAddress();
 //	 			System.out.println(" 打印本机ip地址："+ip);
 //	 			a.setServer("192.168.11.39", 8888);
- 				recognition.setServer("127.0.0.1", 40010);
+// 				recognition.setServer("127.0.0.1", 40010);
+                SpeechAnalysisTool recognition=new SpeechAnalysisTool();
  				
  				columnFamily=new String(CellUtil.cloneFamily(cell));
  				columnQualifier=new String(CellUtil.cloneQualifier(cell));
@@ -56,12 +57,12 @@ public class DNAAudioSearchMapReduceJob2 {
  				//如果是原始语音的  且 qulifer 等于  AUdioByte的，我进行固定音频检测
  				if(columnFamily.equals("AudioOriginalByteFile")&&columnQualifier.equals("AudioByte")){
  					//送数据
- 	 				recognition.setSoundData(CellUtil.cloneValue(cell));
+                    recognition.setSounddata(CellUtil.cloneValue(cell));
  		 			//执行固定音频检索	
- 	 				recognition.doRecognize();
+ 	 				recognition.doFixAudioSearch();
  	 				//设置输出值
  	 				k.set(rowkey);
- 	 				v.set(recognition.getRecognitionResult());
+ 	 				v.set(recognition.getRecognitionresult());
  	 	 			context.write(k, v);	
  				}
  			}
